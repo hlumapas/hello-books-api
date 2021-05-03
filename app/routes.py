@@ -57,8 +57,8 @@ def get_single_book(book_id):
         return {
             "message": f"ID {book_id} must be an integer",
             "success": False 
-        }, 400 
-
+        }, 404
+        
     # try to find the book with given id
     # need to find Book instance based on book_id
     book = Book.query.get(book_id)
