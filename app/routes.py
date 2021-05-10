@@ -18,7 +18,12 @@ def is_int(value):
 @books_bp.route("", methods=["GET"], strict_slashes=False)
 def books_index():
     # inherits class method called query it has a .all function
-    books = Book.query.all()
+    title_from_url = request.args.get("title")
+    if title_from_url: 
+        books = Book.query.filter_by(title=title_from_url)
+    else: 
+        books = Book.query.all()
+        
     books_response = []
     # each book is an instance of the Book model 
     for book in books: 
@@ -26,7 +31,8 @@ def books_index():
 
     # have to use jsonify bc books_response is a list
     # flask knows how to make dict into json 
-    return jsonify(books_response,200)
+    return jsonify(books_response)
+
 
 @books_bp.route("", methods=["POST"], strict_slashes=False)
 def books():
@@ -62,16 +68,15 @@ def get_single_book(book_id):
     # try to find the book with given id
     # need to find Book instance based on book_id
     book = Book.query.get(book_id)
-
-    # need a way to verify if the book_id is even a book in the database
-    if request.method == "GET":
-        if book: #if its truthy and this prevents a crash if book id not found
-            return book.to_json(), 200 
-
+    if book is None: #if its truthy and this prevents a crash if book id not found
         return {
             "message": f"Book with id {book_id} does not exist!",     
             "success": False
         }, 404
+    # need a way to verify if the book_id is even a book in the database
+    if request.method == "GET":
+        return book.to_json(), 200 
+
     elif request.method == "PUT":
         form_data = request.get_json()
 
